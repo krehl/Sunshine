@@ -1,10 +1,12 @@
 package de.kkrehl.udacity.sunshine;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -57,15 +59,6 @@ public class ForecastFragment extends Fragment {
 
 
         ArrayList<String> weatherData = new ArrayList<String>();
-        weatherData.add("Today - Sunny - 88 / 63");
-        weatherData.add("Tomorrow - Foggy - 10 / 46");
-        weatherData.add("Weds - Cloudy - 72 / 63");
-        weatherData.add("Thurs - Rainy - 64 / 51");
-        weatherData.add("Fri - Foggy - 70 / 46");
-        weatherData.add("Sat - Sunny - 76 / 68");
-
-
-
         mForecastAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_forecast,R.id.list_item_forecast_textView,weatherData);
         listView = (ListView) rootView.findViewById(R.id.listView_forecast);
         listView.setAdapter(mForecastAdapter);
@@ -74,10 +67,10 @@ public class ForecastFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String forecast = mForecastAdapter.getItem(position);
-                Toast toast = Toast.makeText(getActivity(),forecast,Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(getActivity(), forecast, Toast.LENGTH_SHORT);
                 toast.show();
-                Intent intent = new Intent(getActivity(),DetailActivity.class)
-                        .putExtra(Intent.EXTRA_TEXT,forecast);
+                Intent intent = new Intent(getActivity(), DetailActivity.class)
+                        .putExtra(Intent.EXTRA_TEXT, forecast);
                 startActivity(intent);
             }
         });
@@ -96,12 +89,29 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
 
         if (R.id.action_resfresh == id) {
-            FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
-            fetchWeatherTask.execute("37083,de");
+            updateWeather();
+            return true;
+        }
+        if (R.id.action_view_location == id) {
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateWeather() {
+        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
+        //fetchWeatherTask.execute("37083,de");
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String location = sharedPref.getString(getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
+        fetchWeatherTask.execute(location);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
     }
 
     private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
@@ -122,9 +132,21 @@ public class ForecastFragment extends Fragment {
          * Prepare the weather high/lows for presentation.
          */
         private String formatHighLows(double high, double low) {
+
+            //metric or imperial conversion, assuming metric data
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String pref_temp = sharedPreferences.getString(getString(R.string.pref_temp_units_key), getString(R.string.pref_units_metric));
+            if (pref_temp.equals(getString(R.string.pref_units_imperial))) {
+                high = high * (9 / 5) + 32; //conversion
+                low = low * (9 / 5) + 32;
+            } else if (!pref_temp.equals(getString(R.string.pref_units_metric))) {
+                Log.v(LOG_TAG, "Unit type not found" + pref_temp);
+            }
+
             // For presentation, assume the user doesn't care about tenths of a degree.
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
+
 
             String highLowStr = roundedHigh + "/" + roundedLow;
             return highLowStr;
@@ -334,5 +356,4 @@ public class ForecastFragment extends Fragment {
             }
         }
     }
-
 }
