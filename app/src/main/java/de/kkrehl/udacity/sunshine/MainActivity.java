@@ -1,7 +1,10 @@
 package de.kkrehl.udacity.sunshine;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,7 +39,21 @@ public class MainActivity extends ActionBarActivity {
             startActivity(intent);
             return true;
         }
+        if (R.id.action_view_location == id) {
+            show_map();
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void show_map() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String location = sharedPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
+        intent.setData(Uri.parse("geo:0,0?q=" + location));
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 }

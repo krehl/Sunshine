@@ -92,10 +92,6 @@ public class ForecastFragment extends Fragment {
             updateWeather();
             return true;
         }
-        if (R.id.action_view_location == id) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
