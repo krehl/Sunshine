@@ -82,6 +82,7 @@ public class WeatherProvider extends ContentProvider {
         uriMatcher.addURI(authority, WeatherContract.PATH_WEATHER + "/*/*", WEATHER_WITH_LOCATION_AND_DATE);
         uriMatcher.addURI(authority, WeatherContract.PATH_LOCATION, LOCATION);
 
+
         // 3) Return the new matcher!
         return uriMatcher;
     }
