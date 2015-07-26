@@ -131,7 +131,7 @@ public class ForecastFragment extends Fragment {
 
             //metric or imperial conversion, assuming metric data
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String pref_temp = sharedPreferences.getString(getString(R.string.pref_temp_units_key), getString(R.string.pref_units_metric));
+            String pref_temp = sharedPreferences.getString(getString(R.string.pref_units_key), getString(R.string.pref_units_metric));
             if (pref_temp.equals(getString(R.string.pref_units_imperial))) {
                 high = high * (9 / 5) + 32; //conversion
                 low = low * (9 / 5) + 32;
