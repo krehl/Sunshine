@@ -141,13 +141,15 @@ public class TestDb extends AndroidTestCase {
         // Insert ContentValues into database and get a row ID back
         sqLiteDatabase.insert(WeatherContract.WeatherEntry.TABLE_NAME, null, contentValues);
         // Query the database and receive a Cursor back
-        Cursor cursor = sqLiteDatabase.query(WeatherContract.WeatherEntry.TABLE_NAME,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
+        Cursor cursor = sqLiteDatabase.query(
+                WeatherContract.WeatherEntry.TABLE_NAME,  // Table to Query
+                null, // leaving "columns" null just returns all the columns.
+                null, // cols for "where" clause
+                null, // values for "where" clause
+                null, // columns to group by
+                null, // columns to filter by row groups
+                null  // sort order
+        );
         // Move the cursor to a valid database row
         assertTrue("No entry", cursor.moveToFirst());
         // Validate data in resulting Cursor with the original ContentValues
@@ -178,11 +180,14 @@ public class TestDb extends AndroidTestCase {
         Cursor cursor = sqLiteDatabase.query(WeatherContract.LocationEntry.TABLE_NAME, null, null,
                 null, null, null, null);
         // Move the cursor to a valid database row
-        cursor.moveToFirst();
+        assertTrue("Could not move to first location", cursor.moveToFirst());
         // Validate data in resulting Cursor with the original ContentValues
         // (you can use the validateCurrentRecord function in TestUtilities to validate the
         // query if you like)
-        TestUtilities.validateCursor("Location does not match.", cursor, contentValues);
+        TestUtilities.validateCurrentRecord("Does not match", cursor, contentValues);
+
+        assertFalse("More than one entry", cursor.moveToNext());
+
         // Finally, close the cursor and database
         cursor.close();
         sqLiteDatabase.close();
